@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGU - Admin Database Management</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  </head>
+  <body>
+    <aside id="sidebar-main" class="sidebar">
+      <div class="logo" style="display: flex; align-items: center;">
+            <img src="assets/images/AGU.png" alt="Logo AGU" style="height:60px; width:60px; object-fit:cover; border-radius:50%; display:inline-block; margin-right:10px;">
+            <span style="font-size: 1.5rem; font-weight: bold; line-height: 1;">AGU - PMS</span>
+        </div>
+      <nav>
+            <div class="menu-item active" onclick="showView('khoa')"><i class="fas fa-building"></i> Quản lý Khoa</div>
+            <div class="menu-item" onclick="showView('bomon')"><i class="fas fa-sitemap"></i> Quản lý Bộ môn</div>
+            <div class="menu-item" onclick="showView('heso')"><i class="fas fa-percent"></i> Quản lý Hệ số quy đổi</div>
+            <div class="menu-item" onclick="showView('nguoidung')"><i class="fas fa-user"></i> Quản lý Người dùng</div>
+            <!--
+            <div class="menu-item index-only"><a href="Index.html" style="color: inherit; text-decoration: none;"><i class="fas fa-database"></i> Người dùng</a></div>   
+            -->
+          </nav>
+    </aside>
+
+    <main class="content">
+      <header>
+        <div class="left-header">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" type="text" placeholder="Tìm kiếm...">
+            <button id="voiceBtn" class="icon-btn voice-btn" title="Ghi âm/Chuyển giọng nói">
+                <i class="fas fa-microphone"></i>
+            </button>
+          </div>
+
+          </div>
+          <div class="user-actions">
+            <div class="profile">
+              <div class="profile-top" onclick="toggleProfileMenu(event)">
+                <button id="notifBtn" class="icon-btn notif-btn" title="Thông báo">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <span>Admin</span>
+                <img src="assets/images/admin.jpg" alt="Avatar" class="avatar">
+              </div>
+
+              <!-- MENU DROPDOWN -->
+              <div id="profileMenu" class="profile-menu">
+                <button onclick="logout()">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>  
+    </main>
+
+    <div class="main-content full" id="main-content">
+      <div id="admin-view-khoa" class="admin-view" style="display:none;"></div>
+            <script>
+            async function loadAdminKhoa() {
+              const container = document.getElementById('admin-view-khoa');
+              container.innerHTML = `
+              <section class="view" style="display:block;">
+                <h2>Quản lý Khoa</h2>
+                <div class="form-row">
+                  <input type='text' id='khoa-ten' placeholder='Tên khoa' required>
+                  <button type='submit' id='btn-add-khoa' class='btn-add'><i class='fas fa-plus'></i> Thêm</button>
+                </div>
+                <table class='simple-table' style='margin-top:16px;'>
+                  <thead><tr><th>ID</th><th>Tên khoa</th><th>Thao tác</th></tr></thead>
+                  <tbody id='khoa-list'></tbody>
+                </table>
+              </section>
+              `;
+              // Hiển thị danh sách khoa
+              const ds = await DatabaseAPI.getDanhSachKhoa();
+              const tbody = document.getElementById('khoa-list');
+              tbody.innerHTML = ds.map(khoa => `
+                <tr>
+                  <td>${khoa.ID}</td>
+                  <td><span id='khoa-ten-${khoa.ID}'>${khoa.TEN_KHOA}</span></td>
+                  <td>
+                    <button onclick='editKhoa(${khoa.ID})' class='icon-btn' title='Sửa'><i class='fas fa-edit'></i></button>
+                    <button onclick='deleteKhoa(${khoa.ID})' class='icon-btn' title='Xóa'><i class='fas fa-trash'></i></button>
+                  </td>
+                </tr>
+              `).join('');
+              // Thêm mới khoa
+              document.getElementById('btn-add-khoa').onclick = async function() {
+                const ten = document.getElementById('khoa-ten').value.trim();
+                if (!ten) return;
+                const res = await DatabaseAPI.taoKhoa(ten);
+                if (res.success) loadAdminKhoa();
+                else alert('Tên khoa đã tồn tại!');
+              };
+            }
+            // Sửa khoa
+            window.editKhoa = async function(id) {
+              const span = document.getElementById('khoa-ten-' + id);
+              const old = span.textContent;
+              span.innerHTML = `<input id='edit-khoa-input-${id}' value='${old}' style='padding:4px;width:140px;'> <button onclick='saveEditKhoa(${id})' class='icon-btn' title='Lưu'><i class='fas fa-check'></i></button>`;
+            };
+            window.saveEditKhoa = async function(id) {
+              const val = document.getElementById('edit-khoa-input-' + id).value.trim();
+              if (!val) return;
+              const res = await DatabaseAPI.capNhatKhoa(id, { TEN_KHOA: val });
+              if (res.success) loadAdminKhoa();
+              else alert('Lỗi cập nhật!');
+            };
+            // Xóa khoa
+            window.deleteKhoa = async function(id) {
+              if (!confirm('Xóa khoa này?')) return;
+              const res = await DatabaseAPI.xoaKhoa(id);
+              if (res.success) loadAdminKhoa();
+              else alert('Lỗi xóa!');
+            };
+            </script>
+      <div id="admin-view-bomon" class="admin-view" style="display:none;"></div>
+      <div id="admin-view-heso" class="admin-view" style="display:none;"></div>
+      <div id="admin-view-nguoidung" class="admin-view" style="display:none;"></div>
+      <div id="settingsFormContainer" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Hiển thị view chức năng admin
+        function showAdminView(view) {
+          // Ẩn tất cả view
+          document.querySelectorAll('.admin-view').forEach(v => v.style.display = 'none');
+          // Hiện view tương ứng
+          const v = document.getElementById('admin-view-' + view);
+          if (v) v.style.display = 'block';
+          // Ẩn welcome
+          document.querySelector('h2').style.display = 'none';
+          // Gọi hàm load dữ liệu
+          if (view === 'khoa') loadAdminKhoa && loadAdminKhoa();
+          if (view === 'bomon') loadAdminBoMon && loadAdminBoMon();
+          if (view === 'heso') loadAdminHeSo && loadAdminHeSo();
+          if (view === 'nguoidung') loadAdminNguoiDung && loadAdminNguoiDung();
+        }
+        window.showAdminView = showAdminView;
+    // Chuyển đổi sidebar
+    document.getElementById('btn-settings').onclick = function() {
+      document.getElementById('sidebar-main').classList.add('hidden');
+      document.getElementById('sidebar-settings').classList.remove('hidden');
+    };
+    document.getElementById('back-main').onclick = function() {
+      document.getElementById('sidebar-settings').classList.add('hidden');
+      document.getElementById('sidebar-main').classList.remove('hidden');
+      document.getElementById('settingsFormContainer').style.display = 'none';
+      document.getElementById('main-content').classList.add('full');
+    };
+
+    ['setting-color','setting-dark','setting-lang','setting-avatar','setting-notify','setting-remind'].forEach(function(id) {
+      document.getElementById(id).onclick = function() {
+        document.getElementById('settingsFormContainer').innerHTML = settingsFormHtml[id.replace('setting_','setting_')];
+        document.getElementById('settingsFormContainer').style.display = 'block';
+        document.getElementById('main-content').classList.remove('full');
+      };
+    });
+    </script>
+
+    <button id="settingsBtn" class="settings-btn" title="Cài đặt" onclick="toggleSettings()">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <button id="helpBtn" class="help-btn" title="Hỗ trợ" onclick="toggleHelp()">
+        <span class="help-circle"><i class="fas fa-question"></i></span>
+    </button>
+
+    <div id="settingsPanel" class="settings-panel">
+        <h4 data-i18n="settings">Cài đặt</h4>
+
+        <div class="setting-item">
+            <i class="fas fa-palette"></i>
+            <span data-i18n="theme">Chủ đề màu</span>
+            <input type="color" id="themeColorPicker">
+        </div>
+
+        <div class="setting-item">
+            <i class="fas fa-moon"></i>
+            <span data-i18n="darkMode">Chế độ tối</span>
+            <input type="checkbox" id="darkModeToggle">
+        </div>
+
+        <div class="setting-item">
+            <i class="fas fa-globe"></i>
+            <span data-i18n="language">Ngôn ngữ</span>
+            <select id="languageSelect">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <i class="fas fa-bell"></i>
+            <span data-i18n="emailNotify">Nhận thông báo Email</span>
+            <input type="checkbox" id="emailNotifyToggle">
+        </div>
+
+        <div class="setting-item">
+            <i class="fas fa-clock"></i>
+            <span data-i18n="reminder">Nhắc trước</span>
+            <input type="number" id="reminderDays">
+        </div>
+
+        <div class="setting-actions">
+            <button onclick="applySettings()" data-i18n="save">Lưu</button>
+            <button onclick="loadSettings()" data-i18n="reload">Tải lại</button>
+            <button onclick="toggleSettings()" data-i18n="close">Đóng</button>
+        </div>
+    </div>
+
+    <div id="helpPanel" class="settings-panel help-panel" aria-hidden="true">
+        <h4>Trợ giúp nhanh</h4>
+        <p style="font-size:13px; margin:6px 0;">- Nhấn biểu tượng micro để chuyển giọng nói thành văn bản trong ô tìm kiếm.</p>
+        <div style="margin-top:10px; text-align:right;">
+            <button onclick="toggleHelp()">Đóng</button>
+        </div>
+    </div>
+
+    <script src="db-api.js"></script>
+    <script src="script.js"></script>
+  </body>
+  </html>
