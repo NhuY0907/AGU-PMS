@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AGU - Personal Management System (AGU-PMS)
 
 Hệ thống hỗ trợ lập kế hoạch công tác dành riêng cho Giảng viên Trường Đại học An Giang.
@@ -20,3 +21,7 @@ Hệ thống hỗ trợ lập kế hoạch công tác dành riêng cho Giảng v
 ## 📝 Hướng dẫn cài đặt
 1. Tải về hoặc Clone thư mục dự án.
 2. Mở file `index.html` trên bất kỳ trình duyệt nào.
+=======
+# AGU-PMS
+Hệ thống quản lý nhiệm vụ giảng viên (AGU PMS) 
+>>>>>>> b3833fae02cb0e3d2799058de2b6fd04c50510b7
