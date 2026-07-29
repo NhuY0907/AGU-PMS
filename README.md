@@ -11,7 +11,7 @@ Hệ thống hỗ trợ lập kế hoạch công tác dành riêng cho Giảng v
 ## 🛠 Công nghệ sử dụng
 - **Frontend:** HTML5, CSS3, JavaScript.
 - **Icons:** FontAwesome 6.0.
-- **Backend (Gợi ý):** SQL Server.
+- **Backend:** SQL Server.
 
 ## 📁 Cấu trúc thư mục
 - `index.html`: Giao diện cấu trúc chính.
